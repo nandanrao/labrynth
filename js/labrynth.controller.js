@@ -2,10 +2,10 @@ angular.module('maintenenceWorker')
 	.controller('LabrynthCtrl', function ($scope, $q, $window, RoomFactory, navigate){
 		var vm = this;
 		$scope.logBook = {};
+		$window.logBook = $scope.logBook;
 		$scope.$watchCollection('logBook', function(logBook){
 			$scope.bustedRooms = _.filter(logBook, {order: -1})
 			$scope.litRooms = _.reject(logBook, {order: -1})
-			$scope.challengeCode = _.pluck(_.sortBy($scope.litRooms, 'order'), 'writing').join('')
 		});
 
 		function getEnteredDoor(dir, prev){
@@ -37,8 +37,12 @@ angular.module('maintenenceWorker')
 			return coords
 		};
 
+		$window.pause = function(){
+			RoomFactory = undefined;
+		}
+
 		function inspect(id, dir, prev){
-			console.log('going', dir)
+			console.log('going', dir, !!$scope.logBook[id], id)
 			if ($scope.logBook[id]){
 				return
 			}
@@ -65,7 +69,12 @@ angular.module('maintenenceWorker')
 
 		navigate.start().then(function(results){
 			inspect(results.roomId).then(function(){
-				$window.alert('report:' + $scope.challengeCode + JSON.stringify(_.map(_.pluck($scope.bustedRooms, 'id'))))
+				// console.log('busted rooms', $scope.bustedRooms)
+				var challengeCode = _.pluck(_.sortBy($scope.litRooms, 'order'), 'writing').join('')
+				navigate.submitReport({
+					roomIds: _.map(_.pluck($scope.bustedRooms, 'id')),
+					challenge: challengeCode	
+				})
 			})
 		})
 	})

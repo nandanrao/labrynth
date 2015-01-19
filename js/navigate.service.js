@@ -31,5 +31,11 @@ angular.module('maintenenceWorker')
 			})
 		}
 
+		navigate.submitReport = function(report){
+			var path = root + 'report'
+			console.log('report:', report)
+			$http.post(path, report)
+		}
+
 		return navigate
 	})
